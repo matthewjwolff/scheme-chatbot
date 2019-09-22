@@ -1,0 +1,35 @@
+<!--
+    This file is part of Foobar.
+   
+    Foobar is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+   
+    Foobar is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.wolff</groupId>
+  <artifactId>scheme-chatbot</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Scheme Chatbot</name>
+  <description>A chatbot for various applications configurable via Scheme</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>kawa</groupId>
+  		<artifactId>kawa</artifactId>
+  		<version>1.7</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.discord4j</groupId>
+  		<artifactId>discord4j-core</artifactId>
+  		<version>3.0.9</version>
+  	</dependency>
+  </dependencies>
+</project>
