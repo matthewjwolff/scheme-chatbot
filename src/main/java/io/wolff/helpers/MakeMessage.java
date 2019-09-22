@@ -29,13 +29,16 @@ public class MakeMessage extends ProcedureN {
 	@Override
 	public Object applyN(Object[] arg0) throws Throwable {
 		ComplexMessage message = new ComplexMessage();
+		StringBuilder builder = new StringBuilder();
 		for(Object arg : arg0) {
 			if(arg instanceof Embeddable) {
 				message.embeds.add((Embeddable) arg);
 			} else {
-				message.content = String.valueOf(arg);
+				builder.append(String.valueOf(arg));
+				builder.append("\n");
 			}
 		}
+		message.content=builder.toString();
 		return message;
 	}
 

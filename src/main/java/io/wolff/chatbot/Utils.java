@@ -16,11 +16,36 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import gnu.lists.FString;
+import gnu.math.DFloNum;
+import gnu.math.IntNum;
+
 public class Utils {
 	public static String maxLength(String s, int maxLength) {
 		if(s.length() > maxLength) {
 			return s.substring(0, maxLength);
 		}
 		return s;
+	}
+	
+	/**
+	 * Convert the output of a scheme eval into a standard Java object
+	 * @param o the output of Interpreter.eval
+	 * @return a standard-library Java object, null if no specific return value
+	 */
+	public static Object convertResult(Object o) {
+		if(o==null) {
+			throw new IllegalArgumentException("Must be nonnull");
+		}
+		if(o instanceof FString) {
+			return o.toString();
+		}
+		if(o instanceof IntNum) {
+			return ((IntNum) o).ival;
+		}
+		if(o instanceof DFloNum) {
+			return ((DFloNum)o).doubleValue();
+		}
+		return o;
 	}
 }

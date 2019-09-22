@@ -27,7 +27,7 @@ class MainTest {
 	void testConvertResult() throws Throwable {
 		Object o = new Scheme().eval("(+ 2.5 3)");
 		System.out.println(o);
-		Object o2 = Main.convertResult(o);
+		Object o2 = Utils.convertResult(o);
 		System.out.println(o2);
 	}
 

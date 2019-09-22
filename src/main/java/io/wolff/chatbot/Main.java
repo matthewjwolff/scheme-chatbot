@@ -18,15 +18,14 @@ package io.wolff.chatbot;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.spec.MessageCreateSpec;
-import gnu.lists.FString;
-import gnu.math.DFloNum;
-import gnu.math.IntNum;
 import io.wolff.chatbot.pojo.ComplexMessage;
 import io.wolff.chatbot.pojo.Embeddable;
 import io.wolff.chatbot.pojo.ImageEmbed;
@@ -44,15 +43,14 @@ public class Main {
 		}
 		DiscordClient client = new DiscordClientBuilder(args[0]).build();
 		Scheme scheme = new Scheme();
-		// apply helper functions
-		scheme.defineFunction(new MakeMessage());
-		scheme.defineFunction(new EmbedImage());
+		initializeInterpreter(scheme);
 		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
 			Optional<String> content = event.getMessage().getContent();
 			if(content.isPresent() && content.get().startsWith("!")) {
 				event.getMessage().getChannel().block().createMessage(message -> {
 					try {
 						//Scheme.registerEnvironment();
+						// TODO timeout
 						Object result = scheme.eval(content.get().substring(1));
 						// this should be the only typecheck performed
 						if(result instanceof ComplexMessage) {
@@ -64,7 +62,7 @@ public class Main {
 					} catch (Throwable e) {
 						message.setContent(e.getMessage());
 						message.setEmbed(embed -> {
-							embed.setTitle("Dev info");
+							embed.setTitle("Stack Trace");
 							StringWriter s = new StringWriter();
 							PrintWriter pw = new PrintWriter(s);
 							e.printStackTrace(pw);
@@ -78,9 +76,24 @@ public class Main {
 		client.login().block();
 		
 	}
+
+	private static void initializeInterpreter(Scheme scheme) {
+		// apply helper functions
+		scheme.defineFunction(new MakeMessage());
+		scheme.defineFunction(new EmbedImage());
+		try {
+			String globalScript = Files.readAllLines(Paths.get("global.scm"))
+					.stream()
+					.reduce((str1, str2) -> str1 + "\n" + str2)
+					.get();
+			scheme.eval(globalScript);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	private static void handleComplexMessage(MessageCreateSpec message, ComplexMessage result) {
-		message.setContent(result.content);
+		message.setContent(Utils.maxLength(String.valueOf(result.content), DISCORD_MESSAGE_MAX_LENGTH));
 		if(result.embeds!=null && !result.embeds.isEmpty()) {
 			message.setEmbed(embed -> {
 				for(Embeddable embeddable : result.embeds ) {
@@ -93,25 +106,6 @@ public class Main {
 		
 	}
 
-	/**
-	 * Convert the output of a scheme eval into a standard Java object
-	 * @param o the output of Interpreter.eval
-	 * @return a standard-library Java object, null if no specific return value
-	 */
-	public static Object convertResult(Object o) {
-		if(o==null) {
-			throw new IllegalArgumentException("Must be nonnull");
-		}
-		if(o instanceof FString) {
-			return o.toString();
-		}
-		if(o instanceof IntNum) {
-			return ((IntNum) o).ival;
-		}
-		if(o instanceof DFloNum) {
-			return ((DFloNum)o).doubleValue();
-		}
-		return o;
-	}
+	
 
 }
