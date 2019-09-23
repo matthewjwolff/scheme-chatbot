@@ -16,10 +16,12 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 import discord4j.core.DiscordClient;
@@ -36,6 +38,7 @@ import kawa.standard.Scheme;
 public class Main {
 
 	private static final int DISCORD_MESSAGE_MAX_LENGTH = 2000;
+	private static final String COMMAND_PREFIX = "!";
 
 	public static void main(String[] args) {
 		if(args.length != 1) {
@@ -46,12 +49,15 @@ public class Main {
 		initializeInterpreter(scheme);
 		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
 			Optional<String> content = event.getMessage().getContent();
-			if(content.isPresent() && content.get().startsWith("!")) {
+			if(content.isPresent() && content.get().startsWith(COMMAND_PREFIX)) {
 				event.getMessage().getChannel().block().createMessage(message -> {
 					try {
 						//Scheme.registerEnvironment();
 						// TODO timeout
-						Object result = scheme.eval(content.get().substring(1));
+						String command = content.get().substring(COMMAND_PREFIX.length());
+						Object result = scheme.eval(command);
+						// the command was successful, log it
+						log(command);
 						// this should be the only typecheck performed
 						if(result instanceof ComplexMessage) {
 							handleComplexMessage(message, (ComplexMessage) result);
@@ -77,16 +83,33 @@ public class Main {
 		
 	}
 
+	private static void log(String command) {
+		try {
+			Files.write(Paths.get("log.scm"), (command+"\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static void initializeInterpreter(Scheme scheme) {
 		// apply helper functions
 		scheme.defineFunction(new MakeMessage());
 		scheme.defineFunction(new EmbedImage());
 		try {
+			// define global functions from scheme
 			String globalScript = Files.readAllLines(Paths.get("global.scm"))
 					.stream()
 					.reduce((str1, str2) -> str1 + "\n" + str2)
 					.get();
 			scheme.eval(globalScript);
+			// init from history
+ 			if(Files.exists(Paths.get("log.scm"))) {
+				String historyScript = Files.readAllLines(Paths.get("log.scm"))
+						.stream()
+						.reduce((str1, str2) -> str1 + "\n" + str2)
+						.get();
+				scheme.eval(historyScript);
+ 			}
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
