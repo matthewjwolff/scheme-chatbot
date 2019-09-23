@@ -32,6 +32,7 @@ import io.wolff.chatbot.pojo.ComplexMessage;
 import io.wolff.chatbot.pojo.Embeddable;
 import io.wolff.chatbot.pojo.ImageEmbed;
 import io.wolff.helpers.EmbedImage;
+import io.wolff.helpers.IsUrl;
 import io.wolff.helpers.MakeMessage;
 import kawa.standard.Scheme;
 
@@ -95,6 +96,7 @@ public class Main {
 		// apply helper functions
 		scheme.defineFunction(new MakeMessage());
 		scheme.defineFunction(new EmbedImage());
+		scheme.defineFunction(new IsUrl());
 		try {
 			// define global functions from scheme
 			String globalScript = Files.readAllLines(Paths.get("global.scm"))
