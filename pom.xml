@@ -22,11 +22,6 @@
   <description>A chatbot for various applications configurable via Scheme</description>
   <dependencies>
   	<dependency>
-  		<groupId>kawa</groupId>
-  		<artifactId>kawa</artifactId>
-  		<version>1.7</version>
-  	</dependency>
-  	<dependency>
   		<groupId>com.discord4j</groupId>
   		<artifactId>discord4j-core</artifactId>
   		<version>3.0.9</version>
