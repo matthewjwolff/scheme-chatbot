@@ -18,18 +18,27 @@ public abstract class AbstractBot {
 	
 	protected AbstractBot( ) {
 		this.scheme = new Scheme();
+		defineGlobalFunctions();
 		initializeInterpreter();
 	}
 	
 	abstract void beginListening();
 	
-	protected Object execScheme(String command, Map<String, Object> transientEnvironment) throws Throwable {
-		for(Map.Entry<String, Object> entry : transientEnvironment.entrySet()) {
-			scheme.define(entry.getKey(), entry.getValue());
+	protected final Object execScheme(String command) throws Throwable {
+		return this.execScheme(command, null);
+	}
+	
+	protected final Object execScheme(String command, Map<String, Object> transientEnvironment) throws Throwable {
+		if(transientEnvironment!=null) {
+			for(Map.Entry<String, Object> entry : transientEnvironment.entrySet()) {
+				scheme.define(entry.getKey(), entry.getValue());
+			}
 		}
 		Object result = scheme.eval(command);
-		for(String key : transientEnvironment.keySet()) {
-			scheme.define(key, null);
+		if(transientEnvironment!=null) {
+			for(String key : transientEnvironment.keySet()) {
+				scheme.define(key, null);
+			}
 		}
 
 		// the command was successful, log it
@@ -38,13 +47,7 @@ public abstract class AbstractBot {
 		return result;
 	}
 	
-	private void initializeInterpreter() {
-		// apply helper functions
-		// TODO: how to handle implementation-dependent functions
-		scheme.defineFunction(new MakeMessage());
-		scheme.defineFunction(new EmbedImage());
-		scheme.defineFunction(new IsUrl());
-		scheme.defineFunction(new SenderHasPerm());
+	protected void initializeInterpreter() {
 		try {
 			// define global functions from scheme
 			String globalScript = Files.readAllLines(Paths.get("global.scm"))
@@ -64,8 +67,17 @@ public abstract class AbstractBot {
 			throw new RuntimeException(e);
 		}
 	}
+
+	protected void defineGlobalFunctions() {
+		// apply helper functions
+		// TODO: how to handle implementation-dependent functions
+		scheme.defineFunction(new MakeMessage());
+		scheme.defineFunction(new EmbedImage());
+		scheme.defineFunction(new IsUrl());
+		scheme.defineFunction(new SenderHasPerm());
+	}
 	
-	private void log(String command) {
+	protected void log(String command) {
 		try {
 			Files.write(Paths.get("log.scm"), (command+"\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
 		} catch (IOException e) {
