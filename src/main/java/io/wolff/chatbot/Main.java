@@ -27,6 +27,8 @@ import java.util.Optional;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.spec.MessageCreateSpec;
 import io.wolff.chatbot.pojo.ComplexMessage;
 import io.wolff.chatbot.pojo.Embeddable;
@@ -34,6 +36,7 @@ import io.wolff.chatbot.pojo.ImageEmbed;
 import io.wolff.helpers.EmbedImage;
 import io.wolff.helpers.IsUrl;
 import io.wolff.helpers.MakeMessage;
+import io.wolff.helpers.SenderHasPerm;
 import kawa.standard.Scheme;
 
 public class Main {
@@ -51,12 +54,21 @@ public class Main {
 		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
 			Optional<String> content = event.getMessage().getContent();
 			if(content.isPresent() && content.get().startsWith(COMMAND_PREFIX)) {
-				event.getMessage().getChannel().block().createMessage(message -> {
+				// grab some vars to bind them in scheme
+				Message inMessage = event.getMessage();
+				MessageChannel channel = inMessage.getChannel().block();
+				channel.createMessage(message -> {
 					try {
 						//Scheme.registerEnvironment();
 						// TODO timeout
 						String command = content.get().substring(COMMAND_PREFIX.length());
+						scheme.define("_event", event);
+						//scheme.define("_message", inMessage);
+						//scheme.define("_channel", channel);
 						Object result = scheme.eval(command);
+						scheme.define("_event", null);
+						//scheme.define("_message", null);
+						//scheme.define("_channel", null);
 						// the command was successful, log it
 						log(command);
 						// this should be the only typecheck performed
@@ -78,6 +90,7 @@ public class Main {
 					}
 				}).block();
 			}
+			
 		});
 
 		client.login().block();
@@ -97,6 +110,7 @@ public class Main {
 		scheme.defineFunction(new MakeMessage());
 		scheme.defineFunction(new EmbedImage());
 		scheme.defineFunction(new IsUrl());
+		scheme.defineFunction(new SenderHasPerm());
 		try {
 			// define global functions from scheme
 			String globalScript = Files.readAllLines(Paths.get("global.scm"))
