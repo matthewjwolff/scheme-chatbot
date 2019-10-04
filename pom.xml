@@ -26,5 +26,10 @@
   		<artifactId>discord4j-core</artifactId>
   		<version>3.0.9</version>
   	</dependency>
+  	<dependency>
+  		<groupId>io.wolff</groupId>
+  		<artifactId>groupme-bot-api</artifactId>
+  		<version>0.0.1.SNAPSHOT</version>
+  	</dependency>
   </dependencies>
 </project>

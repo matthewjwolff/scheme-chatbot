@@ -21,6 +21,13 @@ import gnu.math.DFloNum;
 import gnu.math.IntNum;
 
 public class Utils {
+	public static boolean isEmpty(String s) {
+		if(s == null || s.length()==0) {
+			return true;
+		}
+		return false;
+	}
+	
 	public static String maxLength(String s, int maxLength) {
 		if(s.length() > maxLength) {
 			return s.substring(0, maxLength);

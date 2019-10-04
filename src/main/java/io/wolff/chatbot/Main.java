@@ -18,9 +18,30 @@ package io.wolff.chatbot;
 
 public class Main {
 	public static void main(String[] args) {
-		if(args.length != 1) {
-			throw new IllegalArgumentException("Please provide key only.");
+		String mode = null;
+		String key = null;
+		for(int i=0; i<args.length; i++) {
+			if(args[i].equals("-m")) {
+				mode = args[++i];
+			} else if(args[i].equals("-k")) {
+				key = args[++i];
+			}
 		}
-		new DiscordBot(args[0]).beginListening();
+		if(mode==null || key==null) {
+			throw new IllegalArgumentException("Usage: -m Botmode -k key");
+		}
+		AbstractBot bot;
+		switch(mode) {
+		case "Discord":
+			bot = new DiscordBot(key);
+			break;
+		case "GroupMe":
+		case "Groupme":
+			bot = new GroupmeBot(key);
+			break;
+			default: throw new UnsupportedOperationException("Do not support this bot type");
+		}
+		
+		bot.beginListening();
 	}
 }
