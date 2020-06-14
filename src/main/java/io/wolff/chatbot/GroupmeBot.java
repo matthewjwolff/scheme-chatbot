@@ -40,12 +40,10 @@ public class GroupmeBot extends AbstractBot {
 				String response;
 				try {
 					Object result = this.execScheme(message.text.substring(1));
-					if(result==null || Utils.isEmpty(result.toString())) {
-						response = "OK";
-					} else {
-						response = result.toString();
+					if(result==null) {
+						return;
 					}
-					
+					response = result.toString();
 				} catch (Throwable e) {
 					response = e.getMessage();
 				}

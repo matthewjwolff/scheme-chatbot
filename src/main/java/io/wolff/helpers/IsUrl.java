@@ -24,7 +24,7 @@ import gnu.mapping.Procedure1;
 public class IsUrl extends Procedure1 {
 	
 	public IsUrl() {
-		super("is-url");
+		super("is-url?");
 	}
 
 	@Override

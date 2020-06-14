@@ -16,10 +16,8 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
 import io.wolff.helpers.EmbedImage;
@@ -40,11 +38,25 @@ public abstract class AbstractBot {
 	
 	abstract void beginListening();
 	
+	/**
+	 * Callback to define implementation-specific symbols
+	 * Subclasses can override. The default implementation is a no-op
+	 */
+	void defineLocals(Scheme interpreter) {}
+	
 	protected final Object execScheme(String command) throws Throwable {
 		return this.execScheme(command, null);
 	}
 	
+	/**
+	 * Execute the provided scheme code within the provided environment
+	 * @param command the scheme code to execute
+	 * @param transientEnvironment a set of key-value pairs that will be bound in an enclosing environment. TODO: is this environment transient
+	 * @return the result of the command. A bot should return the result as a message; if the result is null, no message should be sent.
+	 * @throws Throwable any exception the command might throw. The bot should use an implementation-specific format to display the error to the sender
+	 */
 	protected final Object execScheme(String command, Map<String, Object> transientEnvironment) throws Throwable {
+		// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
 		if(transientEnvironment!=null) {
 			for(Map.Entry<String, Object> entry : transientEnvironment.entrySet()) {
 				scheme.define(entry.getKey(), entry.getValue());
@@ -56,9 +68,6 @@ public abstract class AbstractBot {
 				scheme.define(key, null);
 			}
 		}
-
-		// the command was successful, log it
-		log(command);
 		
 		return result;
 	}
@@ -71,14 +80,7 @@ public abstract class AbstractBot {
 					.reduce((str1, str2) -> str1 + "\n" + str2)
 					.get();
 			scheme.eval(globalScript);
-			// init from history
- 			if(Files.exists(Paths.get("log.scm"))) {
-				String historyScript = Files.readAllLines(Paths.get("log.scm"))
-						.stream()
-						.reduce((str1, str2) -> str1 + "\n" + str2)
-						.get();
-				scheme.eval(historyScript);
- 			}
+			this.defineLocals(this.scheme);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
@@ -86,18 +88,9 @@ public abstract class AbstractBot {
 
 	protected void defineGlobalFunctions() {
 		// apply helper functions
-		// TODO: how to handle implementation-dependent functions
 		scheme.defineFunction(new MakeMessage());
 		scheme.defineFunction(new EmbedImage());
 		scheme.defineFunction(new IsUrl());
 		scheme.defineFunction(new SenderHasPerm());
-	}
-	
-	protected void log(String command) {
-		try {
-			Files.write(Paths.get("log.scm"), (command+"\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 }

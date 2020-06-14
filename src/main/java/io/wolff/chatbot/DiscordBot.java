@@ -52,22 +52,20 @@ public class DiscordBot extends AbstractBot {
 				// grab some vars to bind them in scheme
 				Message inMessage = event.getMessage();
 				MessageChannel channel = inMessage.getChannel().block();
-				channel.createMessage(message -> {
-					try {
-						//Scheme.registerEnvironment();
-						// TODO timeout
-						String command = content.get().substring(COMMAND_PREFIX.length());
-						Map<String, Object> env = new HashMap<>();
-						env.put("_event", event);
-						Object result = this.execScheme(command, env);
-						// this should be the only typecheck performed
-						if(result instanceof ComplexMessage) {
-							handleComplexMessage(message, (ComplexMessage) result);
-						} else {
-							String response = Utils.maxLength(String.valueOf(result), DISCORD_MESSAGE_MAX_LENGTH);
-							message.setContent(response.isEmpty() ? "OK" : response);
-						}
-					} catch (Throwable e) {
+				String command = content.get().substring(COMMAND_PREFIX.length());
+				Map<String, Object> env = new HashMap<>();
+				env.put("_event", event);
+				try {
+					Object result = this.execScheme(command, env);
+					if(result!=null) {
+						String response = Utils.maxLength(String.valueOf(result), DISCORD_MESSAGE_MAX_LENGTH);
+						channel.createMessage(message -> {
+							message.setContent(response);
+						}).block();
+						
+					}
+				} catch (Throwable e) {
+					channel.createMessage(message -> {
 						message.setContent(e.getMessage());
 						message.setEmbed(embed -> {
 							embed.setTitle("Stack Trace");
@@ -76,8 +74,8 @@ public class DiscordBot extends AbstractBot {
 							e.printStackTrace(pw);
 							embed.setDescription(Utils.maxLength(s.toString(), DISCORD_MESSAGE_MAX_LENGTH));
 						});
-					}
-				}).block();
+					}).block();
+				}
 			}
 			
 		});
@@ -85,6 +83,7 @@ public class DiscordBot extends AbstractBot {
 		client.login().block();
 	}
 	
+	// TODO: handle implementation-specific messsage creation via callback from scheme
 	private void handleComplexMessage(MessageCreateSpec message, ComplexMessage result) {
 		message.setContent(Utils.maxLength(String.valueOf(result.content), DISCORD_MESSAGE_MAX_LENGTH));
 		if(result.embeds!=null && !result.embeds.isEmpty()) {

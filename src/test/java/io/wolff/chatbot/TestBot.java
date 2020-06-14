@@ -27,11 +27,6 @@ public class TestBot extends AbstractBot {
 	protected void initializeInterpreter() {
 		// do nothing
 	}
-
-	@Override
-	protected void log(String command) {
-		// do nothing
-	}
 	
 	
 

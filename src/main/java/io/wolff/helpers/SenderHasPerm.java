@@ -25,13 +25,13 @@ import gnu.mapping.SimpleSymbol;
 public class SenderHasPerm extends Procedure1 {
 	
 	public SenderHasPerm() {
-		super("sender-has-perm");
+		super("sender-has-perm?");
 	}
 
 	@Override
 	public Object apply1(Object arg1) throws Throwable {
 		if(!(arg1 instanceof String)) {
-			throw new IllegalArgumentException("Invalid usage of sender-has-perm. Use (sender-has-perm perm:String)");
+			throw new IllegalArgumentException("Invalid usage of sender-has-perm?. Use (sender-has-perm? perm:String)");
 		}
 		String perm = (String) arg1;
 		Environment e = Environment.getCurrent();
