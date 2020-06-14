@@ -54,4 +54,10 @@ public class GroupmeBot extends AbstractBot {
 		}
 	}
 
+	@Override
+	public void sendMessage(String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

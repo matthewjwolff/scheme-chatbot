@@ -79,4 +79,9 @@ public class DiscordBot extends AbstractBot {
 		client.login().block();
 	}
 
+	@Override
+	public void sendMessage(String message) {
+		// TODO must figure out what channel the message was sent in so that we can send the message to that channel
+	}
+
 }

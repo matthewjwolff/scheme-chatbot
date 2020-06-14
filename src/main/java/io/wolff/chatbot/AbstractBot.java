@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import io.wolff.helpers.IsUrl;
+import io.wolff.helpers.SendMessage;
 import io.wolff.helpers.SenderHasPerm;
 import kawa.standard.Scheme;
 
@@ -41,6 +42,12 @@ public abstract class AbstractBot {
 	 * Subclasses can override. The default implementation is a no-op
 	 */
 	void defineLocals(Scheme interpreter) {}
+	
+	/**
+	 * Sends the provided message to the bot's chat
+	 * @param message the message to send
+	 */
+	public abstract void sendMessage(String message);
 	
 	protected final Object execScheme(String command) throws Throwable {
 		return this.execScheme(command, null);
@@ -86,6 +93,7 @@ public abstract class AbstractBot {
 
 	protected void defineGlobalFunctions() {
 		// apply helper functions
+		scheme.defineFunction(new SendMessage(this));
 		scheme.defineFunction(new IsUrl());
 		scheme.defineFunction(new SenderHasPerm());
 	}
