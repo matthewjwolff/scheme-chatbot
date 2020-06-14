@@ -27,10 +27,6 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.spec.MessageCreateSpec;
-import io.wolff.chatbot.pojo.ComplexMessage;
-import io.wolff.chatbot.pojo.Embeddable;
-import io.wolff.chatbot.pojo.ImageEmbed;
 
 public class DiscordBot extends AbstractBot {
 	
@@ -81,21 +77,6 @@ public class DiscordBot extends AbstractBot {
 		});
 
 		client.login().block();
-	}
-	
-	// TODO: handle implementation-specific messsage creation via callback from scheme
-	private void handleComplexMessage(MessageCreateSpec message, ComplexMessage result) {
-		message.setContent(Utils.maxLength(String.valueOf(result.content), DISCORD_MESSAGE_MAX_LENGTH));
-		if(result.embeds!=null && !result.embeds.isEmpty()) {
-			message.setEmbed(embed -> {
-				for(Embeddable embeddable : result.embeds ) {
-					if(embeddable instanceof ImageEmbed) {
-						embed.setImage(((ImageEmbed)embeddable).url);
-					}
-				}
-			});
-		}
-		
 	}
 
 }

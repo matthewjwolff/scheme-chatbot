@@ -20,9 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-import io.wolff.helpers.EmbedImage;
 import io.wolff.helpers.IsUrl;
-import io.wolff.helpers.MakeMessage;
 import io.wolff.helpers.SenderHasPerm;
 import kawa.standard.Scheme;
 
@@ -88,8 +86,6 @@ public abstract class AbstractBot {
 
 	protected void defineGlobalFunctions() {
 		// apply helper functions
-		scheme.defineFunction(new MakeMessage());
-		scheme.defineFunction(new EmbedImage());
 		scheme.defineFunction(new IsUrl());
 		scheme.defineFunction(new SenderHasPerm());
 	}
