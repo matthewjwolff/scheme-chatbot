@@ -80,7 +80,7 @@ public class DiscordBot extends AbstractBot {
 	}
 
 	@Override
-	public void sendMessage(String message) {
+	public void sendMessage(String message, Object target) {
 		// TODO must figure out what channel the message was sent in so that we can send the message to that channel
 	}
 

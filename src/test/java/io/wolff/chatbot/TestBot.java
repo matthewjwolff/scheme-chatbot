@@ -27,9 +27,9 @@ public class TestBot extends AbstractBot {
 	protected void initializeInterpreter() {
 		// do nothing
 	}
-
+	
 	@Override
-	public void sendMessage(String message) {
+	public void sendMessage(String message, Object target) {
 		// do nothing
 	}
 	
