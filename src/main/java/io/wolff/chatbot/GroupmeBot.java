@@ -39,7 +39,7 @@ public class GroupmeBot extends AbstractBot {
 			if(message.text.startsWith("!")) {
 				String response;
 				try {
-					Object result = this.execScheme(message.text.substring(1));
+					Object result = this.execScheme(message.text.substring(1), message.sender_id, message);
 					if(result==null) {
 						return;
 					}
@@ -58,6 +58,12 @@ public class GroupmeBot extends AbstractBot {
 	public void sendMessage(String message, Object target) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public boolean userHasPermission(String permission, Object user) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

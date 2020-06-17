@@ -18,15 +18,16 @@ package io.wolff.chatbot;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
+import gnu.mapping.Environment;
+import gnu.mapping.SimpleSymbol;
 
 public class DiscordBot extends AbstractBot {
 	
@@ -45,14 +46,11 @@ public class DiscordBot extends AbstractBot {
 		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
 			Optional<String> content = event.getMessage().getContent();
 			if(content.isPresent() && content.get().startsWith(COMMAND_PREFIX)) {
-				// grab some vars to bind them in scheme
 				Message inMessage = event.getMessage();
 				MessageChannel channel = inMessage.getChannel().block();
 				String command = content.get().substring(COMMAND_PREFIX.length());
-				Map<String, Object> env = new HashMap<>();
-				env.put("_event", event);
 				try {
-					Object result = this.execScheme(command, env);
+					Object result = this.execScheme(command, event.getMember().orElse(null), inMessage);
 					if(result!=null) {
 						String response = Utils.maxLength(String.valueOf(result), DISCORD_MESSAGE_MAX_LENGTH);
 						channel.createMessage(message -> {
@@ -82,6 +80,16 @@ public class DiscordBot extends AbstractBot {
 	@Override
 	public void sendMessage(String message, Object target) {
 		// TODO must figure out what channel the message was sent in so that we can send the message to that channel
+	}
+
+	@Override
+	public boolean userHasPermission(String perm, Object user) {
+		// TODO: refactor this to not pull a symbol out of the environment
+		Environment e = Environment.getCurrent();
+		Object o = e.get(new SimpleSymbol("_user"));
+		MessageCreateEvent event = (MessageCreateEvent) o;
+		Member member = event.getMember().get();
+		return member.getRoles().any(role -> role.getName().equals(perm)).block();
 	}
 
 }

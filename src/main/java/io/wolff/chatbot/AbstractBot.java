@@ -18,11 +18,10 @@ package io.wolff.chatbot;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 
 import io.wolff.helpers.IsUrl;
 import io.wolff.helpers.SendTo;
-import io.wolff.helpers.SenderHasPerm;
+import io.wolff.helpers.UserHasPerm;
 import kawa.standard.Scheme;
 
 public abstract class AbstractBot {
@@ -50,30 +49,28 @@ public abstract class AbstractBot {
 	 */
 	public abstract void sendMessage(String message, Object target);
 	
-	protected final Object execScheme(String command) throws Throwable {
-		return this.execScheme(command, null);
-	}
+	/**
+	 * Check if the user has this permission
+	 * @param permission the name of the permission
+	 * @param user an implementation-defined reference to a user
+	 * @return true if the user has the permission
+	 */
+	public abstract boolean userHasPermission(String permission, Object user);
 	
 	/**
 	 * Execute the provided scheme code within the provided environment
 	 * @param command the scheme code to execute
-	 * @param transientEnvironment a set of key-value pairs that will be bound in an enclosing environment. TODO: is this environment transient
+	 * @param sender implementation-specific object for the sender of the message. Bound to _sender in scheme
+	 * @param message implementation-specific object for the message itself. Bound to _message in scheme
 	 * @return the result of the command. A bot should return the result as a message; if the result is null, no message should be sent.
 	 * @throws Throwable any exception the command might throw. The bot should use an implementation-specific format to display the error to the sender
 	 */
-	protected final Object execScheme(String command, Map<String, Object> transientEnvironment) throws Throwable {
+	protected final Object execScheme(String command, Object sender, Object message) throws Throwable {
 		// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
-		if(transientEnvironment!=null) {
-			for(Map.Entry<String, Object> entry : transientEnvironment.entrySet()) {
-				scheme.define(entry.getKey(), entry.getValue());
-			}
-		}
+		scheme.define("_sender", sender);
+		scheme.define("_message", message);
+
 		Object result = scheme.eval(command);
-		if(transientEnvironment!=null) {
-			for(String key : transientEnvironment.keySet()) {
-				scheme.define(key, null);
-			}
-		}
 		
 		return result;
 	}
@@ -96,6 +93,6 @@ public abstract class AbstractBot {
 		// apply helper functions
 		scheme.defineFunction(new SendTo(this));
 		scheme.defineFunction(new IsUrl());
-		scheme.defineFunction(new SenderHasPerm());
+		scheme.defineFunction(new UserHasPerm(this));
 	}
 }

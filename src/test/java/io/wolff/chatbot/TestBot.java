@@ -32,6 +32,11 @@ public class TestBot extends AbstractBot {
 	public void sendMessage(String message, Object target) {
 		// do nothing
 	}
+
+	@Override
+	public boolean userHasPermission(String permission, Object user) {
+		return true;
+	}
 	
 	
 

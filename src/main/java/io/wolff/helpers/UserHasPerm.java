@@ -16,29 +16,26 @@
  *******************************************************************************/
 package io.wolff.helpers;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import gnu.mapping.Environment;
-import gnu.mapping.Procedure1;
-import gnu.mapping.SimpleSymbol;
+import gnu.mapping.Procedure2;
+import io.wolff.chatbot.AbstractBot;
 
-public class SenderHasPerm extends Procedure1 {
+public class UserHasPerm extends Procedure2 {
 	
-	public SenderHasPerm() {
-		super("sender-has-perm?");
+	private final AbstractBot bot;
+	
+	public UserHasPerm(AbstractBot bot) {
+		super("user-has-perm?");
+		this.bot = bot;
 	}
 
+	//TODO: refactor to delegate permission check to specific subclass
 	@Override
-	public Object apply1(Object arg1) throws Throwable {
+	public Object apply2(Object arg0, Object arg1) throws Throwable {
 		if(!(arg1 instanceof String)) {
 			throw new IllegalArgumentException("Invalid usage of sender-has-perm?. Use (sender-has-perm? perm:String)");
 		}
 		String perm = (String) arg1;
-		Environment e = Environment.getCurrent();
-		Object o = e.get(new SimpleSymbol("_user"));
-		MessageCreateEvent event = (MessageCreateEvent) o;
-		Member member = event.getMember().get();
-		return member.getRoles().any(role -> role.getName().equals(perm)).block();
+		return this.bot.userHasPermission(perm, arg0);
 	}
 
 }

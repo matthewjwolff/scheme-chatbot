@@ -27,11 +27,11 @@ class AbstractBotTest {
 		TestBot test = new TestBot();
 		
 		// assert basic functionality
-		Object result = test.execScheme("(define x 5) x");
+		Object result = test.execScheme("(define x 5) x", null, null);
 		assertEquals("5", result.toString());
 		
 		// assert state is preserved
-		result = test.execScheme("x");
+		result = test.execScheme("x", null, null);
 		assertEquals("5", result.toString());
 	}
 
