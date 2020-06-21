@@ -12,12 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ * along with SchemeChatbot.  If not, see <https://www.gnu.org/licenses/>.
  *******************************************************************************/
 package io.wolff.chatbot;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import io.wolff.helpers.IsUrl;
 import kawa.standard.Scheme;
@@ -25,9 +28,12 @@ import kawa.standard.Scheme;
 public abstract class AbstractBot {
 	
 	protected final Scheme scheme;
+	private final List<String> onMessageExpressions;
 	
 	protected AbstractBot( ) {
 		this.scheme = new Scheme();
+		// TODO: make persistent
+		this.onMessageExpressions = new LinkedList<>();
 		// bind a reference to the bot in scheme. This will be how we define functionality in java
 		// TODO: would it be better to use a delegate?
 		this.scheme.define("_bot", this);
@@ -50,6 +56,37 @@ public abstract class AbstractBot {
 	 * @return true if the user has the permission
 	 */
 	public abstract boolean userHasPermission(Object user, String permission);
+	
+	/**
+	 * Register a scheme expression that should be run on every message
+	 * @param expression the expression to be run
+	 */
+	public final void registerOnMessage(String expression) {
+		this.onMessageExpressions.add(expression);
+	}
+	
+	/**
+	 * Alert the bot that a message was sent. If any on-message handlers are registered, they will be run
+	 * @param sender sender of the message
+	 * @param message the text of the message
+	 * @param implementationVars variable map to pass implementation-specific variables
+	 */
+	protected final void onMessage(Object sender, String message, Map<String, Object> implementationVars) {
+		for(String ex : this.onMessageExpressions) {
+			// TODO: environments
+			this.scheme.define("_sender", sender);
+			this.scheme.define("_message", message);
+			for(Map.Entry<String, Object> var : implementationVars.entrySet()) {
+				this.scheme.define(var.getKey(), var.getValue());
+			}
+			try {
+				this.scheme.eval(ex);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	/**
 	 * Execute the provided scheme code within the provided environment
