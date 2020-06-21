@@ -18,6 +18,9 @@ package io.wolff.chatbot;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 class AbstractBotTest {
@@ -26,13 +29,31 @@ class AbstractBotTest {
 	void testExecScheme() throws Throwable {
 		TestBot test = new TestBot();
 		
-		// assert basic functionality
-		Object result = test.execScheme("(define x 5) x", null, null);
-		assertEquals("5", result.toString());
+		Map<String, Object> env = new HashMap<>();
 		
-		// assert state is preserved
-		result = test.execScheme("x", null, null);
-		assertEquals("5", result.toString());
+		// test send message
+		String message = "clarence";
+		Object target = new Object();
+		env.put("message", message);
+		env.put("target", target);
+		
+		test.execScheme("(send-to message target)", env);
+		
+		// assert that the bot method was called
+		assert(test.message==message);
+		assert(test.target==target);
+		
+		String perm = "test";
+		Object user = new Object();
+		env = new HashMap<>();
+		env.put("perm", perm);
+		env.put("user", user);
+		
+		test.execScheme("(user-has-perm? user perm)", env);
+		
+		assert(test.permission==perm);
+		assert(test.user==user);
+		
 	}
 
 }

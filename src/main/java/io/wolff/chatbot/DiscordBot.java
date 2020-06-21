@@ -83,7 +83,7 @@ public class DiscordBot extends AbstractBot {
 	}
 
 	@Override
-	public boolean userHasPermission(String perm, Object user) {
+	public boolean userHasPermission(Object user, String perm) {
 		// TODO: refactor this to not pull a symbol out of the environment
 		Environment e = Environment.getCurrent();
 		Object o = e.get(new SimpleSymbol("_user"));

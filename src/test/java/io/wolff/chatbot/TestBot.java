@@ -16,25 +16,39 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import java.util.Map;
+
 public class TestBot extends AbstractBot {
+	
+	public String message;
+	public Object target;
+	public Object user;
+	public String permission;
 
 	@Override
 	void beginListening() {
 		// do nothing
 	}
 
-	@Override
-	protected void initializeInterpreter() {
-		// do nothing
+	public Object execScheme(String scheme, Map<String, Object> env) {
+		env.entrySet().forEach(entry -> this.scheme.define(entry.getKey(), entry.getValue()));
+		try {
+			return this.scheme.eval(scheme);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
 	public void sendMessage(String message, Object target) {
-		// do nothing
+		this.message = message;
+		this.target= target;
 	}
 
 	@Override
-	public boolean userHasPermission(String permission, Object user) {
+	public boolean userHasPermission(Object user, String permission) {
+		this.user = user;
+		this.permission = permission;
 		return true;
 	}
 	

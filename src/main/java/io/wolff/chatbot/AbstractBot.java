@@ -20,8 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import io.wolff.helpers.IsUrl;
-import io.wolff.helpers.SendTo;
-import io.wolff.helpers.UserHasPerm;
 import kawa.standard.Scheme;
 
 public abstract class AbstractBot {
@@ -30,17 +28,13 @@ public abstract class AbstractBot {
 	
 	protected AbstractBot( ) {
 		this.scheme = new Scheme();
-		defineGlobalFunctions();
+		// bind a reference to the bot in scheme. This will be how we define functionality in java
+		// TODO: would it be better to use a delegate?
+		this.scheme.define("_bot", this);
 		initializeInterpreter();
 	}
 	
 	abstract void beginListening();
-	
-	/**
-	 * Callback to define implementation-specific symbols
-	 * Subclasses can override. The default implementation is a no-op
-	 */
-	void defineLocals(Scheme interpreter) {}
 	
 	/**
 	 * Sends the provided message to the bot's chat
@@ -51,11 +45,11 @@ public abstract class AbstractBot {
 	
 	/**
 	 * Check if the user has this permission
-	 * @param permission the name of the permission
 	 * @param user an implementation-defined reference to a user
+	 * @param permission the name of the permission
 	 * @return true if the user has the permission
 	 */
-	public abstract boolean userHasPermission(String permission, Object user);
+	public abstract boolean userHasPermission(Object user, String permission);
 	
 	/**
 	 * Execute the provided scheme code within the provided environment
@@ -75,24 +69,15 @@ public abstract class AbstractBot {
 		return result;
 	}
 	
-	protected void initializeInterpreter() {
+	private void initializeInterpreter() {
 		try {
 			// define global functions from scheme
-			String globalScript = Files.readAllLines(Paths.get("global.scm"))
-					.stream()
-					.reduce((str1, str2) -> str1 + "\n" + str2)
-					.get();
+			String globalScript = new String(Files.readAllBytes(Paths.get(getClass().getResource("/global.scm").toURI())));
 			scheme.eval(globalScript);
-			this.defineLocals(this.scheme);
+			// this method is just easier in java
+			scheme.defineFunction(new IsUrl());
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	protected void defineGlobalFunctions() {
-		// apply helper functions
-		scheme.defineFunction(new SendTo(this));
-		scheme.defineFunction(new IsUrl());
-		scheme.defineFunction(new UserHasPerm(this));
 	}
 }

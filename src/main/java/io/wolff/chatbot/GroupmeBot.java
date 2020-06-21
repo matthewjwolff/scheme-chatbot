@@ -61,7 +61,7 @@ public class GroupmeBot extends AbstractBot {
 	}
 
 	@Override
-	public boolean userHasPermission(String permission, Object user) {
+	public boolean userHasPermission(Object user, String permission) {
 		// TODO Auto-generated method stub
 		return false;
 	}
