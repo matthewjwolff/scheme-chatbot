@@ -26,7 +26,7 @@ public class TestBot extends AbstractBot {
 	public String permission;
 
 	@Override
-	void beginListening() {
+	public void beginListening() {
 		// do nothing
 	}
 

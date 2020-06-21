@@ -12,9 +12,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ * along with SchemeChatbot.  If not, see <https://www.gnu.org/licenses/>.
  *******************************************************************************/
-package io.wolff.chatbot;
+package io.wolff.impl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,6 +28,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import gnu.mapping.Environment;
 import gnu.mapping.SimpleSymbol;
+import io.wolff.chatbot.AbstractBot;
+import io.wolff.chatbot.Utils;
 
 public class DiscordBot extends AbstractBot {
 	
@@ -42,7 +44,7 @@ public class DiscordBot extends AbstractBot {
 	}
 
 	@Override
-	void beginListening() {
+	public void beginListening() {
 		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(event -> {
 			Optional<String> content = event.getMessage().getContent();
 			if(content.isPresent() && content.get().startsWith(COMMAND_PREFIX)) {

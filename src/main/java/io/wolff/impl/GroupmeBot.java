@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+ * along with SchemeChatbot.  If not, see <https://www.gnu.org/licenses/>.
  *******************************************************************************/
-package io.wolff.chatbot;
+package io.wolff.impl;
 
+import io.wolff.chatbot.AbstractBot;
 import io.wolff.groupme.GroupMeBot;
 import io.wolff.groupme.model.BotMessage;
 import io.wolff.groupme.model.Message;
@@ -31,7 +32,7 @@ public class GroupmeBot extends AbstractBot {
 	}
 
 	@Override
-	void beginListening() {
+	public void beginListening() {
 		//the callback url is handled with groupme
 		Flux<Message> messages = bot.listen();
 		while(true) {

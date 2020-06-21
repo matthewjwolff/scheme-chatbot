@@ -34,7 +34,7 @@ public abstract class AbstractBot {
 		initializeInterpreter();
 	}
 	
-	abstract void beginListening();
+	public abstract void beginListening();
 	
 	/**
 	 * Sends the provided message to the bot's chat

@@ -16,6 +16,9 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import io.wolff.impl.DiscordBot;
+import io.wolff.impl.GroupmeBot;
+
 public class Main {
 	public static void main(String[] args) {
 		String mode = null;
