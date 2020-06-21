@@ -81,16 +81,16 @@ public class DiscordBot extends AbstractBot {
 
 	@Override
 	public void sendMessage(String message, Object target) {
-		// TODO must figure out what channel the message was sent in so that we can send the message to that channel
+		// TODO: will this work on direct user messages (i.e. whispers)
+		MessageChannel channel = (MessageChannel) target;
+		channel.createMessage(m -> {
+			m.setContent(message);
+		}).block();
 	}
 
 	@Override
 	public boolean userHasPermission(Object user, String perm) {
-		// TODO: refactor this to not pull a symbol out of the environment
-		Environment e = Environment.getCurrent();
-		Object o = e.get(new SimpleSymbol("_user"));
-		MessageCreateEvent event = (MessageCreateEvent) o;
-		Member member = event.getMember().get();
+		Member member = (Member) user;
 		return member.getRoles().any(role -> role.getName().equals(perm)).block();
 	}
 
