@@ -16,8 +16,6 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
-import java.util.Map;
-
 public class TestBot extends AbstractBot {
 	
 	public String message;
@@ -28,15 +26,6 @@ public class TestBot extends AbstractBot {
 	@Override
 	public void beginListening() {
 		// do nothing
-	}
-
-	public Object execScheme(String scheme, Map<String, Object> env) {
-		env.entrySet().forEach(entry -> this.scheme.define(entry.getKey(), entry.getValue()));
-		try {
-			return this.scheme.eval(scheme);
-		} catch (Throwable e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 	@Override

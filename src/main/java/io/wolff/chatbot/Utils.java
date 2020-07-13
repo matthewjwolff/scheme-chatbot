@@ -16,9 +16,8 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
-import gnu.lists.FString;
-import gnu.math.DFloNum;
-import gnu.math.IntNum;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class Utils {
 	public static boolean isEmpty(String s) {
@@ -35,24 +34,36 @@ public class Utils {
 		return s;
 	}
 	
-	/**
-	 * Convert the output of a scheme eval into a standard Java object
-	 * @param o the output of Interpreter.eval
-	 * @return a standard-library Java object, null if no specific return value
-	 */
-	public static Object convertResult(Object o) {
-		if(o==null) {
-			throw new IllegalArgumentException("Must be nonnull");
+	public static boolean isUrl(String url) {
+		if(!(url instanceof String)) {
+			throw new IllegalArgumentException("Not a string");
 		}
-		if(o instanceof FString) {
-			return o.toString();
+		try {
+			new URL((String) url);
+		} catch(MalformedURLException e) {
+			return false;
 		}
-		if(o instanceof IntNum) {
-			return ((IntNum) o).ival;
-		}
-		if(o instanceof DFloNum) {
-			return ((DFloNum)o).doubleValue();
-		}
-		return o;
+		return true;
 	}
+	
+//	/**
+//	 * Convert the output of a scheme eval into a standard Java object
+//	 * @param o the output of Interpreter.eval
+//	 * @return a standard-library Java object, null if no specific return value
+//	 */
+//	public static Object convertResult(Object o) {
+//		if(o==null) {
+//			throw new IllegalArgumentException("Must be nonnull");
+//		}
+//		if(o instanceof FString) {
+//			return o.toString();
+//		}
+//		if(o instanceof IntNum) {
+//			return ((IntNum) o).ival;
+//		}
+//		if(o instanceof DFloNum) {
+//			return ((DFloNum)o).doubleValue();
+//		}
+//		return o;
+//	}
 }

@@ -18,25 +18,22 @@ package io.wolff.chatbot;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.wolff.helpers.IsUrl;
-import kawa.standard.Scheme;
+import jscheme.JScheme;
 
 public abstract class AbstractBot {
 	
-	protected final Scheme scheme;
+	protected final JScheme scheme;
 	private final List<String> onMessageExpressions;
 	
 	protected AbstractBot( ) {
-		this.scheme = new Scheme();
-		// TODO: make persistent
-		this.onMessageExpressions = new LinkedList<>();
-		// bind a reference to the bot in scheme. This will be how we define functionality in java
-		// TODO: would it be better to use a delegate?
-		this.scheme.define("_bot", this);
+		this.scheme = new JScheme();
+		// TODO: (de)serialization
+		// TODO: populate onMessageExpressions (part of deserialization i guess)
+		this.onMessageExpressions = new ArrayList<>();
 		initializeInterpreter();
 	}
 	
@@ -73,19 +70,24 @@ public abstract class AbstractBot {
 	 */
 	protected final void onMessage(Object sender, String message, Map<String, Object> implementationVars) {
 		for(String ex : this.onMessageExpressions) {
-			// TODO: environments
-			this.scheme.define("_sender", sender);
-			this.scheme.define("_message", message);
+			// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
 			for(Map.Entry<String, Object> var : implementationVars.entrySet()) {
-				this.scheme.define(var.getKey(), var.getValue());
+				this.scheme.setGlobalValue(var.getKey(), var.getValue());
 			}
-			try {
-				this.scheme.eval(ex);
-			} catch (Throwable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			this.scheme.setGlobalValue("_sender", sender);
+			this.scheme.setGlobalValue("_message", message);
+
+			Object result = this.scheme.eval(ex);
 		}
+	}
+	
+	/**
+	 * Serializes the permanent environment
+	 */
+	public final void serializePermanents() {
+		// TODO: serialization (or is this method even needed
+		throw new RuntimeException("Not implemented yet");
 	}
 	
 	/**
@@ -98,10 +100,10 @@ public abstract class AbstractBot {
 	 */
 	protected final Object execScheme(String command, Object sender, Object message) throws Throwable {
 		// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
-		scheme.define("_sender", sender);
-		scheme.define("_message", message);
+		this.scheme.setGlobalValue("_sender", sender);
+		this.scheme.setGlobalValue("_message", message);
 
-		Object result = scheme.eval(command);
+		Object result = this.scheme.eval(command);
 		
 		return result;
 	}
@@ -110,9 +112,13 @@ public abstract class AbstractBot {
 		try {
 			// define global functions from scheme
 			String globalScript = new String(Files.readAllBytes(Paths.get(getClass().getResource("/global.scm").toURI())));
-			scheme.eval(globalScript);
+			scheme.load(globalScript);
 			// this method is just easier in java
-			scheme.defineFunction(new IsUrl());
+			// TODO: figure out how to make java callbacks
+			//scheme.defineFunction(new IsUrl());
+			
+			// finally, bind this to _bot variable
+			scheme.setGlobalValue("_bot", this);
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}

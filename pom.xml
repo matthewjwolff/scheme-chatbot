@@ -21,6 +21,13 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>Scheme Chatbot</name>
   <description>A chatbot for various applications configurable via Scheme</description>
+  <repositories>
+    <repository>
+      <id>clojars</id>
+      <name>Clojars</name>
+      <url>https://clojars.org/repo/</url>
+    </repository>
+  </repositories>
   <dependencies>
   	<dependency>
   		<groupId>com.discord4j</groupId>
@@ -32,5 +39,14 @@
   		<artifactId>groupme-bot-api</artifactId>
   		<version>0.0.1.SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+  		<groupId>jscheme</groupId>
+  		<artifactId>jscheme</artifactId>
+  		<version>7.2</version>
+  	</dependency>
   </dependencies>
+  <properties>
+  <maven.compiler.source>1.8</maven.compiler.source>
+  <maven.compiler.target>1.8</maven.compiler.target>
+</properties>
 </project>

@@ -16,44 +16,49 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-class AbstractBotTest {
+import jscheme.JScheme;
 
+class AbstractBotTest {
+	
 	@Test
-	void testExecScheme() throws Throwable {
+	void testOnMessage() throws Throwable {
 		TestBot test = new TestBot();
-		
-		Map<String, Object> env = new HashMap<>();
-		
-		// test send message
-		String message = "clarence";
-		Object target = new Object();
-		env.put("message", message);
-		env.put("target", target);
-		
-		test.execScheme("(send-to message target)", env);
-		
-		// assert that the bot method was called
-		assert(test.message==message);
-		assert(test.target==target);
-		
-		String perm = "test";
+		test.registerOnMessage("(define x 5)");
+		test.onMessage(null, null, new HashMap<>());
+		Object result = test.execScheme("x", null, null);
+		assertEquals(5, result);
+	}
+	
+	@Test
+	void testSendTo() throws Throwable {
+		TestBot test = new TestBot();
+		Object sender = new Object();
+		Object message = "This is the message";
+		test.execScheme("(send-to _message _sender)", sender, message);
+		assertEquals(sender, test.target);
+		assertEquals(message, test.message);
+	}
+	
+	@Test
+	void testUserHasPerm() throws Throwable {
+		TestBot test = new TestBot();
 		Object user = new Object();
-		env = new HashMap<>();
-		env.put("perm", perm);
-		env.put("user", user);
-		
-		test.execScheme("(user-has-perm? user perm)", env);
-		
-		assert(test.permission==perm);
-		assert(test.user==user);
-		
+		test.execScheme("(user-has-perm? _sender \"testperm\" )", user, null);
+		assertEquals("testperm", test.permission);
+		assertEquals(user, test.user);
+	}
+	
+	@Test
+	void testIsUrl() throws Throwable {
+		TestBot test = new TestBot();
+		assertEquals(Boolean.FALSE, test.execScheme("(is-url? \"notaurl\")", null, null));
+		assertEquals(Boolean.TRUE, test.execScheme("(is-url? \"http://google.com/\")", null, null));
 	}
 
 }

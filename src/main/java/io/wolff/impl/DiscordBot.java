@@ -26,8 +26,6 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
-import gnu.mapping.Environment;
-import gnu.mapping.SimpleSymbol;
 import io.wolff.chatbot.AbstractBot;
 import io.wolff.chatbot.Utils;
 
