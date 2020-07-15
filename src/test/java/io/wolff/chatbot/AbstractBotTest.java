@@ -19,6 +19,10 @@ package io.wolff.chatbot;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
@@ -58,6 +62,18 @@ class AbstractBotTest {
 		TestBot test = new TestBot();
 		assertEquals(Boolean.FALSE, test.execScheme("(is-url? \"notaurl\")", null, null));
 		assertEquals(Boolean.TRUE, test.execScheme("(is-url? \"http://google.com/\")", null, null));
+	}
+	
+	@Test
+	void testSerialization() throws Throwable {
+		TestBot test = new TestBot();
+		test.execScheme("(define x 5)", null, null);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		test.serializeInterpreter(new ObjectOutputStream(bos));
+		
+		TestBot test2 = new TestBot(new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray())));
+		
+		assertEquals(5, test2.execScheme("x", null, null));
 	}
 
 }

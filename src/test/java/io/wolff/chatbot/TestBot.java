@@ -16,6 +16,9 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 public class TestBot extends AbstractBot {
 	
 	public String message;
@@ -24,6 +27,11 @@ public class TestBot extends AbstractBot {
 	public String permission;
 	
 	public boolean onMessageCalled;
+	
+	public TestBot() {}
+	public TestBot(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+		super(ois);
+	}
 
 	@Override
 	public void beginListening() {

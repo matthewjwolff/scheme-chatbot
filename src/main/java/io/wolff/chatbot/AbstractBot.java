@@ -16,22 +16,43 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
-import jscheme.JScheme;
 
 public abstract class AbstractBot {
 	
-	protected final JScheme scheme;
+	protected final Scheme2 scheme;
 	
+	/**
+	 * Construct a bot with a brand new scheme environment
+	 */
 	protected AbstractBot( ) {
-		this.scheme = new JScheme();
-		// TODO: (de)serialization
+		this.scheme = new Scheme2();
 		initializeInterpreter();
+	}
+	
+	/**
+	 * Construct a bot with the provided environment
+	 * @param inputStream an input stream ready to deserialize a JScheme object
+	 * @throws ClassNotFoundException thrown by inputStream.readObject()
+	 * @throws IOException thrown by inputStream.readObject()
+	 */
+	public AbstractBot(ObjectInputStream inputStream) throws ClassNotFoundException, IOException {
+		this.scheme = (Scheme2) inputStream.readObject();
+		// the serialized environment will obviously not have a reference to this, so we need to set that up
+		scheme.setGlobalValue("_bot", this);
+	}
+	
+	public void serializeInterpreter(ObjectOutputStream destination) throws IOException {
+		// unset this variable so that object serialization will not find a reference to this and attempt to serialize this
+		scheme.setGlobalValue("_bot", null);
+		destination.writeObject(scheme);
+		// set it back so we can continue using the bot
+		scheme.setGlobalValue("_bot", this);
 	}
 	
 	public abstract void beginListening();
@@ -68,14 +89,6 @@ public abstract class AbstractBot {
 	}
 	
 	/**
-	 * Serializes the permanent environment
-	 */
-	public final void serializePermanents() {
-		// TODO: serialization (or is this method even needed
-		throw new RuntimeException("Not implemented yet");
-	}
-	
-	/**
 	 * Execute the provided scheme code within the provided environment
 	 * @param command the scheme code to execute
 	 * @param sender implementation-specific object for the sender of the message. Bound to _sender in scheme
@@ -88,16 +101,24 @@ public abstract class AbstractBot {
 		this.scheme.setGlobalValue("_sender", sender);
 		this.scheme.setGlobalValue("_message", message);
 
-		Object result = this.scheme.load(command);
+		Object result = this.scheme.eval(command);
 		
 		return result;
 	}
+	
+//	private Object evaluateFully(String expression) {
+//		Object result = null;
+//		while(result!=InputPort.EOF) {
+//			Object it = this.scheme.read(s)
+//		}
+//		
+//	}
 	
 	private void initializeInterpreter() {
 		try {
 			// define global functions from scheme
 			String globalScript = new String(Files.readAllBytes(Paths.get(getClass().getResource("/global.scm").toURI())));
-			scheme.load(globalScript);
+			scheme.eval(globalScript);
 			// this method is just easier in java
 			// TODO: figure out how to make java callbacks
 			//scheme.defineFunction(new IsUrl());
