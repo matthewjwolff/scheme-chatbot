@@ -16,23 +16,22 @@
  *******************************************************************************/
 package io.wolff.chatbot;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 
-import jscheme.JScheme;
-
 class AbstractBotTest {
 	
 	@Test
 	void testOnMessage() throws Throwable {
 		TestBot test = new TestBot();
-		test.registerOnMessage("(define x 5)");
+		// register an event listener that calls a method on the test bot
+		test.execScheme("(register-message-listener (lambda (message sender) (.messagecallback _bot)))", null, null);
 		test.onMessage(null, null, new HashMap<>());
-		Object result = test.execScheme("x", null, null);
-		assertEquals(5, result);
+		assertTrue(test.onMessageCalled);
 	}
 	
 	@Test

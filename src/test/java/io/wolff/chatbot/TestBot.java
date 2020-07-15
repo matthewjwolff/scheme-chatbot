@@ -22,6 +22,8 @@ public class TestBot extends AbstractBot {
 	public Object target;
 	public Object user;
 	public String permission;
+	
+	public boolean onMessageCalled;
 
 	@Override
 	public void beginListening() {
@@ -39,6 +41,10 @@ public class TestBot extends AbstractBot {
 		this.user = user;
 		this.permission = permission;
 		return true;
+	}
+	
+	public void messagecallback() {
+		onMessageCalled = true;
 	}
 	
 	

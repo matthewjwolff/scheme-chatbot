@@ -27,13 +27,10 @@ import jscheme.JScheme;
 public abstract class AbstractBot {
 	
 	protected final JScheme scheme;
-	private final List<String> onMessageExpressions;
 	
 	protected AbstractBot( ) {
 		this.scheme = new JScheme();
 		// TODO: (de)serialization
-		// TODO: populate onMessageExpressions (part of deserialization i guess)
-		this.onMessageExpressions = new ArrayList<>();
 		initializeInterpreter();
 	}
 	
@@ -55,31 +52,19 @@ public abstract class AbstractBot {
 	public abstract boolean userHasPermission(Object user, String permission);
 	
 	/**
-	 * Register a scheme expression that should be run on every message
-	 * @param expression the expression to be run
-	 */
-	public final void registerOnMessage(String expression) {
-		this.onMessageExpressions.add(expression);
-	}
-	
-	/**
 	 * Alert the bot that a message was sent. If any on-message handlers are registered, they will be run
 	 * @param sender sender of the message
 	 * @param message the text of the message
 	 * @param implementationVars variable map to pass implementation-specific variables
 	 */
 	protected final void onMessage(Object sender, String message, Map<String, Object> implementationVars) {
-		for(String ex : this.onMessageExpressions) {
-			// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
-			for(Map.Entry<String, Object> var : implementationVars.entrySet()) {
-				this.scheme.setGlobalValue(var.getKey(), var.getValue());
-			}
-			
-			this.scheme.setGlobalValue("_sender", sender);
-			this.scheme.setGlobalValue("_message", message);
-
-			Object result = this.scheme.eval(ex);
+		// TODO: implement transients with proper environment handling (let ((key val)...) (expr))
+		// TODO: do we actually need implementation vars?
+		for(Map.Entry<String, Object> var : implementationVars.entrySet()) {
+			this.scheme.setGlobalValue(var.getKey(), var.getValue());
 		}
+
+		this.scheme.getGlobalSchemeProcedure("on-message").apply(new Object[] {sender, message});
 	}
 	
 	/**
@@ -103,7 +88,7 @@ public abstract class AbstractBot {
 		this.scheme.setGlobalValue("_sender", sender);
 		this.scheme.setGlobalValue("_message", message);
 
-		Object result = this.scheme.eval(command);
+		Object result = this.scheme.load(command);
 		
 		return result;
 	}
